@@ -1,2 +1,3 @@
 # Keti_Language
-Object extansion of Micro Lisp, written in C.
+Objects extansion of Micro Lisp, written in C.
+For Katy, my inspiration.
