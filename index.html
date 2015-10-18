@@ -21,31 +21,27 @@
     <section class="main-content">
       <h3>
 
-<h3>
-<a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating pages manually</h3>
+<h3>Keti Language</h3>
+<h2>By Ori Roth</h2>
 
-<p>
-Keti Language
-By Ori Roth
-
-Background:
+<h1>Background:</h1>
 This is an object oriented version of Micro Lisp. The language is very dynamic, easy to learn and fun. I am a Software Engineering student at the Technion, Israel. This project was done at the summer of 2015.
 
-Micro Lisp Style:
+<h1>Micro Lisp Style:</h1>
 Both languages share the same base values, which are: positive integers, strings, true, false and cons (tuple of two other base values). See also: http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf
 
-What is in the files:
+<h1>What is in the files:</h1>
 * mainloop: contains the main function, which has the main game loop that waits for input, translate and process it and show the result on screen (or error).
 * system: has two main, important parts: the function responsible on the recursive execution of expression, and the implementation of the base functions.
 * memmanage: deals with memory management. Supports allocation of cons, and the mark-sweep algorithm.
 * bitarray: supplies us with bit array, makros supporters.
 
-Structure:
+<h1>Structure:</h1>
 The language implementation is built from three main parts: memory management (memmanage), expressions execution (system) and the interpreter. We will now cover the techniques used in each level of the language.
 
-Memory Management:
+<b>Memory Management:</b>
 All the systems components are represented as cons (see below), thus we support only cons and strings allocation and garbage collection. The cons and string handlers pools are 2^14  in size.
-</p>
+
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/OriRoth/Keti-Programming-Language">Keti-programming-language</a> is maintained by <a href="https://github.com/OriRoth">OriRoth</a>.</span>
 
