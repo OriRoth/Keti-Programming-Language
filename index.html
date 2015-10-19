@@ -24,7 +24,7 @@
 <p>This object oriented version of Micro Lisp is very dynamic, easy to learn and fun. I am a Software Engineering student at the Technion, Israel. This project was done at the summer of 2015.</p>
 
 <h3>Micro Lisp Style:</h3>
-<p>Both languages share the same base values, which are: positive integers, strings, true, false and cons (tuple of two other base values).</p><p>Most expressions are in the form of (&lt;function_name&gt; [&lt;arguments, seperated by &#39; &#39;&gt;]) - in parentheses, and the function comes before the arguments (if any). <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a></p>
+<p>Both languages share the same base values, which are: positive integers, strings, true, nil and cons (tuple of two other base values).</p><p>Most expressions are in the form of (&lt;function_name&gt; [&lt;arguments, seperated by &#39; &#39;&gt;]) - in parentheses, and the function comes before the arguments (if any). <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a></p>
 
 <h3>What is in the files:</h3>
 <p>* mainloop: contains the main function, which has the main game loop that waits for input, translate and process it and show the result on screen (or error).</p>
@@ -36,7 +36,8 @@
 <p>The language implementation is built from three main parts: memory management (memmanage), expressions execution (system) and the interpreter. We will now cover the techniques used in each level of the language.</p>
 
 <b>Memory Management:</b>
-<p>All the systems components are represented as cons (see below), thus we support only cons and strings allocation and garbage collection. The cons and string handlers pools are 2^14  in size.</p>
+<p>All the systems components are represented as cons (see below), thus we support only cons and strings allocation and garbage collection. The cons and string handlers pools are 2^14  in size. Each cons is parted: left type (2bits), left data(14bits), right type (2bits) and right data(14bits). The supported types are integer, string, nil and cons. The string data is the address of a string handler in the string handlers pool, that contains the address of the actual string in the characters pool.</p>
+<p>The cons and string handler pools are maintained by bit mark arrays. The cons pool mark array is</p>
 
 <p></p><a href="google4f28465c7feae320.html">For Google</a>
 
