@@ -94,6 +94,7 @@
 <p><img src="http://i.imgur.com/hvFlTqh.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" align="middle"></p>
 <p><i>Function/untranslated expression:</i> a function (or user input, regarded as non parametric function) is composed of- a) paramters (unvalued symbols) list (that should be replaced when the function is called), and b) the function return value (we calculate it after creating an environment and hashing the parameters into it).</p>
 <p><img src="http://i.imgur.com/EmfLunT.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" align="middle"></p>
+<p><i>System structure:</i> the whole system is maintained at the form of cons, and its components are allocated as regular cons from the same pool. The "environment" C variable points the current environment node, the head of the environments list. Every envronment contains an hash table (actualy a list, currently there is no way to represent arrays in the language), hashing system symbols by their names. Each symbol is native (such as native functions), user defined (by using setq/defun) or inserted to a functions environment.</p>
 <p>To be continued...</p>
 
 <h3>Code Examples:</h3>
