@@ -1,0 +1,37 @@
+(defun contains (lst d)
+	(cond
+		((nil lst) ())
+		((= (car lst) d) t)
+		(t (contains (cdr lst) d))
+	)
+)
+
+(defun not (b)
+	(cond
+		(b ())
+		(t t)
+	)
+)
+
+(defun list_sum (l)
+	(cond
+		((nil l) 0)
+		(t (+ (car l) (list_sum (cdr l))))
+	)
+)
+
+(defun ell ()
+	(assign nil ()
+	(assign contains (defun _temp (l d)
+			(not (< d (car l)))
+		)
+	(assign car (defun _temp (l)
+			(core l)
+		)
+	(assign cdr (defun _temp (l)
+			(assign core (+ 1 (core l)) l)
+		)
+		0))))
+)
+
+(setq x (ell))
