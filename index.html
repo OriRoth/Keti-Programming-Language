@@ -89,7 +89,9 @@
     <td>NIL</td>
     <td>Object. Car value points the object structure (see below).</td>
   </tr>
-</table> 
+</table>
+<p><i>Object structure:</i> the object value is a list of valued symbols. Each symbol represents a field/attribute, and it has some value (could be a function!). Every object supports: "core" field (initial value) and "self" field (points the object itself).</p>
+<p><i>Function/untranslated expression:</i> a function (or user input, regarded as non parametric function) is composed of- a) paramters (unvalued symbols) list (that should be replaced when the function is called), and b) the function return value (we calculate it after creating an environment and hashing the parameters into it).</p>
 <p>To be continued...</p>
 
 <h3>Code Examples:</h3>
