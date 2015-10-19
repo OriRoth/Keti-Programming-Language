@@ -42,6 +42,49 @@
 <p><img src="http://i.imgur.com/Twlj66s.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" align="center"></p>
 
 <b>System Management and Translation:</b>
+<p>In order to support various data types such as function and objects, we define that a type is represented by a whole, single cons.</p>
+ <table style="width:50%" align="center">
+  <tr>
+    <td>NIL</td>
+    <td>NIL</td>
+    <td>(nil/true are constant singletons, existing in 0/1 cells in the cons pool)</td>
+  </tr>
+  <tr>
+    <td>INT</td>
+    <td>NIL</td>
+    <td>Positive integer, between 0 and 2^14-1</td>
+  </tr>
+  <tr>
+    <td>STR</td>
+    <td>NIL</td>
+    <td>String. the value at car is the index of the string handler in the handlers pool.</td>
+  </tr>
+  <tr>
+    <td>CONS</td>
+    <td>CONS</td>
+    <td>Cons. car/cdr value points the car/cdr values as expected.</td>
+  </tr>
+  <tr>
+    <td>STR</td>
+    <td>CONS</td>
+    <td>Symbol. Car points its name, and cdr points its value.</td>
+  </tr>
+  <tr>
+    <td>CONS</td>
+    <td>INT</td>
+    <td>Expression need to be translated. User input or function expression.</td>
+  </tr>
+  <tr>
+    <td>INT</td>
+    <td>INT</td>
+    <td>Native function. Car value contains the index of the C function in a designated array.</td>
+  </tr>
+  <tr>
+    <td>CONS</td>
+    <td>NIL</td>
+    <td>Object. Car value points the object structure (see below).</td>
+  </tr>
+</table> 
 <p>To be continued...</p>
 
 <a href="google4f28465c7feae320.html">For Google</a>
