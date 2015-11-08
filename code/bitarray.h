@@ -15,7 +15,7 @@ const static unsigned char mask_off[8] = { 1 ^ -1, (1 << 1) ^ -1, (1 << 2) ^ -1,
 #define BITAT(bitarray, index) ((bitarray[index>>3] & mask_on[index&7]) > 0)
 #define BITSET(bitarray, index) (bitarray[index>>3] |= mask_on[index&7])
 #define BITUNSET(bitarray, index) (bitarray[index>>3] &= mask_off[index&7])
-#define SETBITS(bitarray, on, size) do {memset((&bitarray), on, BITS(size));} while (0)
+#define SETBITS(bitarray, size) do {int i=0; while(i<BITS(size)) bitarray[i++] = 0;} while (0)
 
 /* bit tree */
 #define TREE_COVERAGE(size) (BITS(size*2))
