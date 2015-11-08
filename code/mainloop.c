@@ -1,197 +1,305 @@
 #include "system.h"
+#include "error.h"
 #include <stdio.h>
+#include <windows.h>
 
 #define INPUT_BUFFER_SIZE (1<<12)
-#define SYNTAX_ERROR -1
+#define SYNTAX_ERROR (-1)
 #define SKIP_SPACES(iter, buff)	do {										\
-									while (isspace(buff[iter])) {++iter;}	\
-									} while(0)
+									while (is_space(buff[iter])) {++iter;}	\
+								} while(0)
 
 char line_buffer[INPUT_BUFFER_SIZE];
 
-void print_error() {
-	if (error) {
-		fprintf(stderr, "Line Failure => ");
-		fprintf(stderr, error_message);
+FILE* input;
+int stdin_backup;
+bool done_reading = false;
+int parentheses_counter;
+
+char get_input(FILE *input) {
+
+	char c;
+	if (!done_reading) {
+		c = fgetc(input);
+	} else {
+		c = getchar();
 	}
+	if (c == ';' && parentheses_counter != 0) {
+		while (c != '\n') {
+			if (!done_reading) {
+				c = fgetc(input);
+			} else {
+				c = getchar();
+			}
+		}
+	}
+	while (c != EOF && c != '\n' && c != '(' && parentheses_counter == 0) {
+		if (c == ';') {
+			while (c != '\n') {
+				if (!done_reading) {
+					c = fgetc(input);
+				} else {
+					c = getchar();
+				}
+			}
+		}
+		if (!done_reading) {
+			c = fgetc(input);
+		} else {
+			c = getchar();
+		}
+	}
+	if (!done_reading) {
+		if (c == '\n' && parentheses_counter == 0) {
+			return get_input(input);
+		}
+		if (c != EOF) {
+			fprintf(stdout, "%c", c);
+		} else {
+			done_reading = true;
+			close(stdin);
+			dup2(stdin_backup, stdin);
+			close(stdin_backup);
+			input = stdin;
+			return ' ';
+		}
+	}
+	return c;
 }
 
-int translate_function(memptr *parent, int start) {
+void move_string_to_string_buffer(int start) {
+
+	int i = 0;
+	do {
+		string_buffer[i++] = line_buffer[start];
+	} while (line_buffer[start++] != '\0' && i < STRING_BUFFER_SIZE);
+}
+
+bool is_space(char c) {
+
+	return c == '\n' || c == '\t' || c == ' ' || c == '\r';
+}
+
+bool is_digit(char c) {
+
+	return (c >= '0' && c <= '9');
+}
+
+bool is_nil;
+int translate_function(memptr parent, int start) {
 
 	int iter = start + 1;
-	SKIP_SPACES(iter, line_buffer);
-	if (line_buffer[iter] == ')') {
-		// not a function but a nil
-		*parent = nil;
-		return ++iter;
-	}
-
-	MemoryPool[*parent].car = new_data();
-	MemoryPool[*parent].carKind = CONS;
-	MemoryPool[*parent].cdrKind = INTEGER;
+	memptr current_node = parent;
 	memptr previous_node = NOT_FOUND;
-	memptr current_node = MemoryPool[*parent].car;
-	MemoryPool[current_node].carKind = MemoryPool[current_node].cdrKind = NIL;
-	memptr current_value;
 
 	while (true) {
-		MemoryPool[current_node].car = new_data();
-		MemoryPool[current_node].carKind = CONS;
-		current_value = MemoryPool[current_node].car;
-		MemoryPool[current_value].carKind = NIL;
-		MemoryPool[current_value].cdrKind = NIL;
 		SKIP_SPACES(iter, line_buffer);
 		if (line_buffer[iter] == ')') {
 			// end of function
-			if (previous_node != NOT_FOUND) {
-				MemoryPool[previous_node].cdrKind = NIL;
+			is_nil = IS_NOT_FOUND(previous_node);
+			if (!IS_NOT_FOUND(previous_node)) {
+				SET_CDR(previous_node, nil);
 			}
 			return ++iter;
 		} else if (line_buffer[iter] == '(') {
 			// start of a function
-			iter = translate_function(&current_value, iter);
+			SET_CAR(current_node, allocate_cons());
+			iter = translate_function(GET_CAR(current_node), iter);
 			if (iter == SYNTAX_ERROR) {
+				is_nil = false;
 				return SYNTAX_ERROR;
 			}
-			MemoryPool[current_node].car = current_value;
-		} else if (isdigit(line_buffer[iter])) {
+			if (is_nil) {
+				SET_CAR(current_node, nil);
+			}
+		} else if (is_digit(line_buffer[iter])) {
 			// a number
 			int number = 0;
-			while (iter < INPUT_BUFFER_SIZE && isdigit(line_buffer[iter])) {
+			while (iter < INPUT_BUFFER_SIZE && is_digit(line_buffer[iter])) {
 				number *= 10;
 				number += line_buffer[iter++] - '0';
 			}
-			MemoryPool[current_value].carKind = INTEGER;
-			MemoryPool[current_value].cdrKind = NIL;
-			MemoryPool[current_value].car = number;
+			SET_CAR(current_node, MAKE_INTEGER(number));
 		} else if (line_buffer[iter] == '\"') {
 			// a string
 			int string_start = iter + 1;
+			int len = 0;
 			while (++iter < INPUT_BUFFER_SIZE && line_buffer[iter] != '\"')
-				;
+				len++;
 			if (iter >= INPUT_BUFFER_SIZE) {
+				is_nil = false;
 				return SYNTAX_ERROR;
 			}
-			line_buffer[iter++] = 0;
-			MemoryPool[current_value].car = connect_string(
-					&(line_buffer[string_start]), current_value);
-			MemoryPool[current_value].carKind = STRING;
-			MemoryPool[current_value].cdrKind = NIL;
+			if (len == 0) {
+				SET_CAR(current_node, nil);
+				iter++;
+			} else {
+				line_buffer[iter++] = 0;
+				move_string_to_string_buffer(string_start);
+				SET_CAR(current_node, allocate_string_from_string_buffer());
+			}
 		} else {
 			// a symbol
 			int symbol_start = iter;
 			while (iter < INPUT_BUFFER_SIZE && line_buffer[iter] != '('
 					&& line_buffer[iter] != ')' && line_buffer[iter] != '\"'
-					&& !isspace(line_buffer[iter])) {
+					&& !is_space(line_buffer[iter])) {
 				++iter;
 			};
 			if (iter >= INPUT_BUFFER_SIZE) {
+				is_nil = false;
 				return SYNTAX_ERROR;
 			}
 			char temp = line_buffer[iter];
 			line_buffer[iter] = 0;
-			if (strcmp(&(line_buffer[symbol_start]), "t") == 0) {
+			if (line_buffer[symbol_start] == 't'
+					&& line_buffer[symbol_start + 1] == '\0') {
 				// t
-				MemoryPool[current_node].car = true;
+				SET_CAR(current_node, t);
 			} else {
-				MemoryPool[current_value].car = connect_string(
-						&(line_buffer[symbol_start]), current_value);
-				MemoryPool[current_value].carKind = STRING;
-				MemoryPool[current_value].cdr = nil;
-				MemoryPool[current_value].cdrKind = CONS;
+				move_string_to_string_buffer(symbol_start);
+				SET_CAR(current_node, allocate_cons());
+				SET_CAR(GET_CAR(current_node), symbol_identifier);
+				SET_CDR(GET_CAR(current_node), allocate_cons());
+				SET_CAR(GET_CDR(GET_CAR(current_node)),
+						allocate_string_from_string_buffer());
+				SET_CDR(GET_CDR(GET_CAR(current_node)), nil);
 			}
 			line_buffer[iter] = temp;
 		}
 
-		MemoryPool[current_node].cdr = new_data();
-		MemoryPool[current_node].cdrKind = CONS;
+		SET_CDR(current_node, allocate_cons());
 		previous_node = current_node;
-		current_node = MemoryPool[current_node].cdr;
+		current_node = GET_CDR(current_node);
 	}
 
+	is_nil = false;
 	return SYNTAX_ERROR;
 }
 
-void print_result(memptr result) {
+#define MAX_DEPTH 4
+void print_result(memptr result, int depth) {
+
+	if (error) {
+		fprintf(stderr, "\n%s failure => %s",
+				&error_first[error_first_identifier * ERROR_FIRST_LIMIT],
+				&error_second[error_second_identifier * ERROR_SECOND_LIMIT]);
+		return;
+	}
 
 	if (result == NOT_FOUND) {
-		if (error) {
-			print_error();
-		} else {
-			fprintf(stderr, "undefined error\n");
-		}
+		fprintf(stderr, "undefined error\n");
+	} else if (depth >= MAX_DEPTH) {
+		fprintf(stdout, ".");
 	} else {
-		if (result == nil) {
-			// nil
-			printf("nil : nil\n");
-		} else if (result == true) {
-			// true
-			printf("true : true\n");
-		} else if (MemoryPool[result].cdrKind == NIL) {
-			if (MemoryPool[result].carKind == INTEGER) {
-				// integer
-				printf("%d : integer\n", MemoryPool[result].car);
-			} else if (MemoryPool[result].carKind == STRING) {
-				// string
-				printf("%s : string\n", get_string(MemoryPool[result].car));
-			} else if (MemoryPool[result].carKind == CONS) {
-				// object
-				printf("<?> : object\n");
-			}
-		} else if (MemoryPool[result].cdrKind == CONS) {
-			if (MemoryPool[result].carKind == CONS) {
-				// cons
-				// TODO: add cons type
-				printf("(<?> , <?>) : cons\n");
-			} else if (MemoryPool[result].carKind == STRING) {
-				// symbol
-				printf("%s : symbol\n", get_string(MemoryPool[result].car));
-			}
-		} else if (MemoryPool[result].cdrKind == INTEGER) {
-			// function
-			// TODO: add functions name
-			printf("<?> : function\n");
+		if (TYPE_NIL(result)) {
+			fprintf(stdout, "nil");
+		} else if (TYPE_T(result)) {
+			fprintf(stdout, "t");
+		} else if (TYPE_INTEGER(result)) {
+			fprintf(stdout, "%d",
+					((signed) fix_integer(INTEGER_VALUE(result))));
+		} else if (TYPE_NATIVE(result)) {
+			fprintf(stdout, "<native %s>",
+					&(native_names_buffer[(result - 2) * NATIVE_NAME_LIMIT]));
+		} else if (TYPE_STRING(result)) {
+			fprintf(stdout, "\"%s\"",
+					&strings_pool[HANDLER_STRING_ADDRESS(
+							GET_CDR(STRING_HANDLER_ADDRESS(result)))]);
+		} else if (TYPE_CONS(result)) {
+			fprintf(stdout, "( ");
+			print_result(GET_CAR(result), depth + 1);
+			fprintf(stdout, " , ");
+			print_result(GET_CDR(result), depth + 1);
+			fprintf(stdout, " )");
+		} else if (result == lambda_identifier) {
+			fprintf(stdout, "<lambda-identifier>");
+		} else if (result == symbol_identifier) {
+			fprintf(stdout, "<symbol-identifier>");
 		}
 	}
 }
 
+//#define LOADING_BAR_WAIT_TIME 200
 void print_logo() {
 
-	printf("\
- __   __  ___   _______  ______    _______    ___      ___   _______  _______ \n\
-|  |_|  ||   | |       ||    _ |  |       |  |   |    |   | |       ||       |\n\
-|       ||   | |       ||   | ||  |   _   |  |   |    |   | |  _____||    _  |\n\
-|       ||   | |       ||   |_||_ |  | |  |  |   |    |   | | |_____ |   |_| |\n\
-|       ||   | |      _||    __  ||  |_|  |  |   |___ |   | |_____  ||    ___|\n\
-| ||_|| ||   | |     |_ |   |  | ||       |  |       ||   |  _____| ||   |    \n\
-|_|   |_||___| |_______||___|  |_||_______|  |_______||___| |_______||___|    \n\
+	fprintf(stdout,
+			"\
+      .-.                                   .-.                   \n\
+        /|/|    .-.                        / (_)     .-.          \n\
+       /   |    `-'.-.    ).--..-._.      /          `-' .   .-.  \n\
+      /    |   /  (      /    (   )      /          /   / \\  /  ) \n\
+ .-' /     |_.(__. `---'/      `-'    .-/.    .-._.(__./ ._)/`-'  \n\
+(__.'      `.                        (_/ `-._.        /    /      \n\
 by Ori Roth\n\n");
+#ifdef LOADING_BAR_WAIT_TIME
+	for (int i=0 ; i<11 ; i++) {
+		fprintf(stdout, "loading... [");
+		for (int j=0 ; j<i ; j++) {
+			fprintf(stdout, "-");
+		}
+		fprintf(stdout, "] %d%%", i * 10);
+		fflush(stdout);
+		Sleep(LOADING_BAR_WAIT_TIME);
+		fprintf(stdout, "\r");
+	}
+	for (int i=0 ; i<28 ; i++) {
+		fprintf(stdout, " ");
+	}
+	fprintf(stdout, "\r");
+#endif
 }
 
-int main() {
+#define DEBUG
+#ifdef DEBUG
+#define PRINT_MEM_LIMIT 300
+void print_mem() {
+
+	fprintf(stdout, "environment=%d\n", environment);
+	fprintf(stdout, "security_head=%d\n", security_head);
+	for (int i = 0; i < PRINT_MEM_LIMIT; i++) {
+		fprintf(stdout, "%4d: ( %d , %d )\n", i, GET_CAR(i), GET_CDR(i));
+	}
+	for (int i = 0; i < PRINT_MEM_LIMIT; i++) {
+		fprintf(stdout, "%4d: %c\n", i,
+				(strings_pool[i] == 0 ? '0' : strings_pool[i]));
+	}
+}
+#endif
+
+int main(int argc, char *argv[]) {
+
+	if (argc > 1) {
+		stdin_backup = dup(stdin);
+		input = fopen(argv[1], "r+");
+	} else {
+		input = stdin;
+		done_reading = true;
+	}
 
 	system_initialize();
-	SECURITY_INIT();
+	security_init();
 	print_logo();
+	fflush(stdout);
 
-	bool correction = 1;
 	while (true) {
 
-		if (correction) {
-			printf("> ");
-			fflush(stdout);
-		}
-		correction = 1 - correction;
+		error = false;
+
+		fprintf(stdout, "> ");
+		fflush(stdout);
 
 		int line_iter = 0;
-		int parentheses_counter = 0;
-		line_buffer[line_iter] = getchar();
+		parentheses_counter = 0;
+		line_buffer[line_iter] = get_input(input);
+		while (is_space(line_buffer[line_iter]))
+			line_buffer[line_iter] = get_input(input);
 		if (line_buffer[line_iter] == '(') {
 			// a lisp commend
 			parentheses_counter = 1;
 			line_iter++;
 			while (parentheses_counter > 0 && line_iter < INPUT_BUFFER_SIZE) {
-				line_buffer[line_iter] = getchar();
+				line_buffer[line_iter] = get_input(input);
 				if (line_buffer[line_iter] == 10) {
 					continue;
 				} else if (line_buffer[line_iter] == '(') {
@@ -206,24 +314,38 @@ int main() {
 				continue;
 			}
 
-			memptr translated_expression = safe_new_data();
-			if (translate_function(&translated_expression, 0) == SYNTAX_ERROR) {
-				ERROR("syntax error\n");
-				print_error();
+			memptr translated_expression = safe_allocate_cons();
+			translate_function(translated_expression, 0);
+			if (is_nil) {
+				translated_expression = nil;
+			}
+			if (translated_expression == NOT_FOUND) {
+				COMMIT_ERROR(ERROR_SYSTEM, ERROR_LE);
+				print_result(0, 0);
 			} else {
-				memptr result = resolve_expr(translated_expression);
-				print_result(result);
+				fflush(stdout);
+				memptr result = resolve_expression(translated_expression);
+				if (!done_reading) {
+					fprintf(stdout, "\n");
+				}
+				if (!error) {
+					fprintf(stdout, "\n~ ");
+				} else {
+					fflush(stderr);
+					fflush(stdout);
+				}
+				print_result(result, 0);
+				fprintf(stdout, "\n\n");
 			}
 		} else {
-			// TODO: add system commends
+			while (get_input(input) != 10)
+				;
+			fprintf(stdout, "\n");
 		}
 
 		fflush(stderr);
 		fflush(stdout);
-		error = false;
-		error_message[0] = 0;
-		SECURITY_INIT();
-
+		security_init();
 	}
 
 	return 0;
