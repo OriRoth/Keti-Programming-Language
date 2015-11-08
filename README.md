@@ -1,3 +1,3 @@
 # Keti Programming Language
-Objects extansion of Micro Lisp, written in C.
+Elegant, minimalistic virtualization of a classic Lisp Machine, written in C.
 For Katy, my inspiration and love.
