@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<meta charset="utf-8" />
+<html lang="he">
   <head>
     <meta charset="UTF-8">
     <title>Keti Programming Language by Ori Roth</title>
@@ -21,82 +22,123 @@
     <section class="main-content">
 
 <h3>Background:</h3>
-<p>This object oriented version of Micro Lisp is very dynamic, easy to learn and fun. I am a Software Engineering student at the Technion, Israel. This project was done at the summer of 2015.</p>
+<p>This is a minimalistic virtualization of a classic <a href="ftp://www.cs.utexas.edu/pub/AI-Lab/tech-reports/UT-AI-TR-85-6.pdf">Lisp</a> Machine, written in C. This implementation is very dynamic, easy to learn and fun! There is no use of pointers/allocations in the code (C accessories), only logic - the system is independent, and deals its memory by itself (including memory sweep). I am a Software Engineering student at the Technion, Israel, and this project was done at the summer of 2015.</p>
 
 <h3>Micro Lisp Style:</h3>
-<p>Both languages share the same base values, which are: positive integers, strings, true, nil and cons (tuple of two other base values).</p><p>Most expressions are in the form of (&lt;function_name&gt; [&lt;arguments, seperated by &#39; &#39;&gt;]) - in parentheses, and the function comes before the arguments (if any). <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a></p>
+<p>Language values are: positive integers, strings, true, nil and cons (tuple of two other base values).</p>
+<p>Supported native functions are:</p>
+<table style="width:60%;text-align:center" align="center">
+	<tr>
+		<th>native function</th>
+		<th>number of arguments</th>
+		<th>what it does</th>
+	</tr>
+	<tr>
+		<td>quote</td>
+		<td>1</td>
+		<td>Return the argument as it is, without interpretation. Could be used in many ways, such as making lists [(quote (1 2 3)) => (1 (2 (3 nil)))] or making symbols [(quote x) => (<symbol identifier> ("x" nil))].</td>
+	</tr>
+	<tr>
+		<td>define</td>
+		<td>2</td>
+		<td>Parameters are a symbol and a value. Makes the symbol a new variable, with the received value (see below).</td>
+	</tr>
+	<tr>
+		<td>lambda</td>
+		<td>2</td>
+		<td>Parameters are a list of parameters and a value. Return a new function, with the received parameters list and value (see below).</td>
+	</tr>
+	<tr>
+		<td>if</td>
+		<td>3</td>
+		<td>Resolve the first argument. If it is true, return the second argument, else the third (if-else structure).</td>
+	</tr>
+	<tr>
+		<td>atom</td>
+		<td>1</td>
+		<td>Returns true if the argument is not cons, else false.</td>
+	</tr>
+	<tr>
+		<td>cons</td>
+		<td>2</td>
+		<td>Creates a new cons, of the two received values.</td>
+	</tr>
+	<tr>
+		<td>car , cdr</td>
+		<td>1</td>
+		<td>Receives a cons, and return its car/cdr.</td>
+	</tr>
+	<tr>
+		<td>+ , - , * , / , = , > , < </td>
+		<td>2</td>
+		<td>Exactly what you think it does.</td>
+	</tr>
+	<tr>
+		<td>nil</td>
+		<td>1</td>
+		<td>Receives a value. Return true if it is nil, else false.</td>
+	</tr>
+</table>
+<p>Most expressions are in the form of (&lt;function_name&gt; [&lt;arguments, seperated by spaces&gt;]) - in parentheses, and the function comes before the arguments (if any) <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>. Moreover, there are special structures which require specific identification: lambda functions (functions created by you) and symbols (system structure, used to connect a name to a value).</p>
+<p><div align="center"><img src="http://s30.postimg.org/pcumb4zsx/img1.png" alt="lambda functions and symbols structure"></div></p>
+<p>Some simple examples:</p>
+<table style="width:50%;text-align:center" align="center">
+	<tr>
+		<th>input</th>
+		<th>result</th>
+	</tr>
+	<tr>
+		<td>(+ 1 1)</td>
+		<td>2</td>
+	</tr>
+	<tr>
+		<td>(> 5 2)</td>
+		<td>t</td>
+	</tr>
+	<tr>
+		<td>(car (cons "car" "cdr"))</td>
+		<td>"car"</td>
+	</tr>
+	<tr>
+		<td>(lambda (x) (* 2 x))</td>
+		<td>{function that receives a number, return the number multiplied by two}</td>
+	</tr>
+	<tr>
+		<td>(define x 3)</td>
+		<td>3 {and now x:=3}</td>
+	</tr>
+</table>
 
 <h3>What is in the files:</h3>
-<p>* mainloop: contains the main function, which has the main game loop that waits for input, translate and process it and show the result on screen (or error).</p>
-<p>* system: has two main, important parts: the function responsible on the recursive execution of expression, and the implementation of the base functions.</p>
-<p>* memmanage: deals with memory management. Supports allocation of cons, and the mark-sweep algorithm.</p>
+<p>* mainloop: contains the main function, which has the main game loop that waits for input, translate and process it and show the result (or error) on screen.</p>
+<p>* system: contains the main translation functions: resolve_expr (which receive a value and resolve it recursively), and lookup (which receive a symbol and return its value).</p>
+<p>* memory: deals with memory management. Supports allocation of cons, and the mark-sweep algorithm.</p>
 <p>* bitarray: supplies us with bit array, makros supporters.</p>
+<p>* native: contains the implementation of the native functions.</p>
+<p>* error: contains the errors logic.</p>
 
 <h3>Structure:</h3>
-<p>The language implementation is built from three main parts: memory management (memmanage), expressions execution (system) and the interpreter. We will now cover the techniques used in each level of the language.</p>
+<p>The language implementation is built from three main parts: memory management (memory.c, memory.h), expressions execution (system.c, system.h) and the interpreter (mainloop.c). We will now cover the techniques used in each level of the language.</p>
 
 <b>Memory Management:</b>
-<p>All the systems components are represented as cons (see below), thus we support only cons and strings allocation and garbage collection. The cons and string handlers pools are 2^14  in size. Each cons is parted: left type (2bits), left data(14bits), right type (2bits) and right data(14bits). The supported types are integer, string, nil and cons. The string data is the address of a string handler in the string handlers pool, that contains the address of the actual string in the characters pool.</p>
-<p>The cons and string handler pools are maintained by bit mark arrays. The cons pool mark array is designed as a binari tree, when a vertex is marked iff all its subtree is marked thus occupied. So one can search for a free cons cell in the pool in log(pool size). When allocating a string, a string handler is allocated as well. It marks a range of char cells in the strings pool as his own. Both the string handlers ans strings pool are maintained by "fillers", pointers that preserve an invariant: everything left of them is allocated (used or not), and everything on the right is free.</p>
-<p><i>Mark n Sweep</i>- Starting from the base group (see below), we re-mark the allocated, in use cons. Then we do the same with the string handlers, moving them to the start of the pool (alongside the filler), sort them by string pool address and move the strings to the start of the pool. That way we a) zero marks of unused cons allocations and b) moves the fillers to the left (means more free space to their right).</p>
-<p><div align="center"><img src="http://i.imgur.com/Twlj66s.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" horizontal-align="middle"></div></p>
+<p>The memory system contains two pools (large arrays of available space): pool of cons (32 bits) - cons_pool, and pool of characters - strings_pool. Alongside the pools we hold a free addresses stack for the cons pool (every time we allocate a cons, we pop an address from the stack and returns it), and a filler for the characters pool (integer pointing the first free cell- during allocation we forward the filler by number of cells equals the length of the allocated string). Shallow copy of strings is supported- instead of pointing the string in the pool, string values (in cons pool) point string handlers (special structure on the cons pool, takes whole cons 32 bits), which are special cons that contains the actual address of the string. Instead of allocating a new string when copying one, we just redirect it to the same handler. Placing the handlers on the cons pool is not mandatory, but it saves a lot of space saved when cancelling the handlers pool.</p>
+<p>When one of the pools is being filled, it is very possible that there are stale allocations we have done sometime in the past, which are no longer required. So instead of crashing the system, we preform <a href="https://en.wikipedia.org/wiki/Tracing_garbage_collection#Basic_algorithm" target="_blank">Garbage Collection</a>. Now we will describe the specific algorithm used in our memory system: First we define a root set- group of cons addresses that are valid and required (such as the current environment, see below). We mark every valid address- notice that the marking process is recursive, marking addresses from the root set and addresses pointed by them. Then we scan the cons pool, pushing free (or used but invalid) addresses to the free addresses stack. Additionally, if an address is mark and its car is handler identifier (special value used only for this purpose), then we push the address to another stack- handlers_sort_buffer. This buffer allows us to clean the strings pool- we sort the handler addresses by string address (at the strings pool), and then moving the strings one by one to the start of the pool (so we can move the strings filler to the left, means more free characters cells to its right). In conclusion, the first part of the algorithm is classic mark and sweep, but dealing with the strings required us using something called <a href="https://en.wikipedia.org/wiki/Fragmentation_%28computing%29" target="_blank">fragmentation</a> (the Hebrew version is very nice fyi).</p>
 
 <b>System Management and Translation:</b>
-<p>In order to support various data types such as function and objects, we define that a type is represented by a whole, single cons.</p>
- <table style="width:50%" align="center">
-  <tr>
-    <th>Car</th>
-    <th>Cdr</th>
-    <th>Type</th>
-  </tr>
-  <tr>
-    <td>NIL</td>
-    <td>NIL</td>
-    <td>(nil/true are constant singletons, existing in 0/1 cells in the cons pool)</td>
-  </tr>
-  <tr>
-    <td>INT</td>
-    <td>NIL</td>
-    <td>Positive integer, between 0 and 2^14-1</td>
-  </tr>
-  <tr>
-    <td>STR</td>
-    <td>NIL</td>
-    <td>String. the value at car is the index of the string handler in the handlers pool.</td>
-  </tr>
-  <tr>
-    <td>CONS</td>
-    <td>CONS</td>
-    <td>Cons. car/cdr value points the car/cdr values as expected.</td>
-  </tr>
-  <tr>
-    <td>STR</td>
-    <td>CONS</td>
-    <td>Symbol. Car points its name, and cdr points its value.</td>
-  </tr>
-  <tr>
-    <td>CONS</td>
-    <td>INT</td>
-    <td>Expression need to be translated. User input or function expression.</td>
-  </tr>
-  <tr>
-    <td>INT</td>
-    <td>INT</td>
-    <td>Native function. Car value contains the index of the C function in a designated array.</td>
-  </tr>
-  <tr>
-    <td>CONS</td>
-    <td>NIL</td>
-    <td>Object. Car value points the object structure (see below).</td>
-  </tr>
-</table>
-<p><i>Object structure:</i> the object value is a list of valued symbols. Each symbol represents a field/attribute, and it has some value (could be a function!). Every object supports: "core" field (initial value) and "self" field (points the object itself).</p>
-<p><div align="center"><img src="http://i.imgur.com/hvFlTqh.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" horizontal-align="middle"></div></p>
-<p><i>Function/untranslated expression:</i> a function (or user input, regarded as non parametric function) is composed of- a) paramters (unvalued symbols) list (that should be replaced when the function is called), and b) the function return value (we calculate it after creating an environment and hashing the parameters into it).</p>
-<p><div align="center"><img src="http://i.imgur.com/9nFhOUr.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" horizontal-align="middle"></div></p>
-<p><i>System structure:</i> the whole system is maintained at the form of cons, and its components are allocated as regular cons from the same pool. The "environment" C variable points the current environment node, the head of the environments list. Every envronment contains an hash table (actualy a list, currently there is no way to represent arrays in the language), hashing system symbols by their names. Each symbol is native (such as native functions), user defined (by using setq/defun) or inserted to a functions environment.</p>
-<p><div align="center"><img src="http://i.imgur.com/uThG3Q9.png" alt="Memory hierarchy structure" style="width:550px;height:550px;" horizontal-align="middle"></div></p>
-<p>To be continued...</p>
+<p>The system uses a special cons structure called A-List. This is a simple cons list, represent the current environment nesting (the head of the list is the current environment). Each environment contains translation list- list of symbols (names and their values). The initial symbols stands for the native function. When we use define, we connect a name with a value- there are two options:</p>
+<p>a) The symbol is not defined: the symbol is inserted to the current environment.</p>
+<p>b) The symbol is already defined, in some environment: the symbol's value is replaced (it does not change place).</p>
+<p>When we use a user function, a new environment is created (its next environment is the previous one), while the arguments sent to the function are being computed and inserted to it (as symbols- they are being linked to the function's parameters in order to create the symbols). Next the function value is computed in the new environment, and finally we destroy the environment (by redirecting the current environment index to the next environment).</p>
+<p><div align="center"><img src="http://s2.postimg.org/kfuz68owp/img2.png" alt="system structure"></div></p>
+<p><div align="center">The system structure- a list (environment nodes) of lists (symbols nodes). This specific state of the system can occur after calling a user function, which uses x as a parameter, with 7 as the argument [for instance, (factorial 7) when factorial is defined by (define factorial (lambda (x) (...)))].</div></p>
+
+
+
+
+
+
+
+
 
 <h3>Code Examples:</h3>
  <table style="width:70%" align="center">
