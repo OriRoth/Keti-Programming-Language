@@ -1,0 +1,17 @@
+(+ 1 1)								; simple prefix use
+
+(cons 1 2)							; cons example
+
+(car (cons (cons 1 2) 3))			; car of cons
+
+(define x 7)						; use of define
+(* x 3)
+
+(define x define)					; what does it do??
+(x define x)
+
+(lambda (x) (+ x 4))				; lambda- nameless function expression
+((lambda (x) (+ x 4)) 5)
+
+(define plus4 (lambda (x) (+ x 4)))	; can fit into variables
+(plus4 3)
