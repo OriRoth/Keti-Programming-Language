@@ -15,6 +15,6 @@
 ))
 
 (map (lambda (x) (- 0 x)) (quote (5 9 13)))             ; should be (-5 (-9 (-13 ())))
-(reduce (lambda (x y) (= (- x y) 4)) (quote (5 9 13)))  ; should be t
+(reduce (lambda (x y) (+ x (- y x)))) (quote (5 9 13)))  ; should be t
 (double (quote (5 9 13)))                               ; should be (10 (18 (26 ())))
 (sorted (quote (5 9 13)))                               ; should be t
