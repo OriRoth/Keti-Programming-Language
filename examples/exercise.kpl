@@ -10,11 +10,11 @@
   "todo: implement"
 ))
 
-(define sorted (lambda (lst)
+(define multilist (lambda (lst)
   "todo: implement"
 ))
 
 (map (lambda (x) (- 0 x)) (quote (5 9 13)))             ; should be (-5 (-9 (-13 ())))
 (reduce (lambda (x y) (- x y))) (quote (5 9 13)))       ; should be -17
 (double (quote (5 9 13)))                               ; should be (10 (18 (26 ())))
-(sorted (quote (5 9 13)))                               ; should be t
+(multilist (quote (5 9 13)))                            ; should be 585
