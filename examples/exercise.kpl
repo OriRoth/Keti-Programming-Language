@@ -1,0 +1,15 @@
+(define map (lambda (func lst)
+  "todo: implement"
+))
+
+(define reduce (lambda (func lst)
+  "todo: implement"
+))
+
+(define double (lambda (lst)
+  "todo: implement"
+))
+
+(define sorted (lambda (lst)
+  "todo: implement"
+))
