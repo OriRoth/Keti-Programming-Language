@@ -79,7 +79,7 @@
 		<td>Receives a value. Return true if it is nil, else false.</td>
 	</tr>
 </table>
-<p>Most expressions are in the form of (&lt;function_name&gt; [&lt;arguments, seperated by spaces&gt;]) - in parentheses, and the function comes before the arguments (if any) <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>. Moreover, there are special structures which require specific identification: lambda functions (functions created by you) and symbols (system structure, used to connect a name to a value).</p>
+<p>Most expressions are in the form of <a href="https://en.wikipedia.org/wiki/Polish_notation" target="_blank">Prefix Notation</a> (&lt;function_name&gt; [&lt;arguments, seperated by spaces&gt;]) - in parentheses, and the function comes before the arguments (if any) <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>. Moreover, there are special structures which require specific identification: lambda functions (functions created by you) and symbols (system structure, used to connect a name to a value).</p>
 <p><div align="center"><img src="http://s30.postimg.org/pcumb4zsx/img1.png" alt="lambda functions and symbols structure"></div></p>
 <p>Some simple examples:</p>
 <table style="width:50%;text-align:center" align="center">
@@ -132,28 +132,27 @@
 <p><div align="center"><img src="http://s2.postimg.org/kfuz68owp/img2.png" alt="system structure"></div></p>
 <p><div align="center">The system structure- a list (environment nodes) of lists (symbols nodes). This specific state of the system can occur after calling a user function, which uses x as a parameter, with 7 as the argument [for instance, (factorial 7) when factorial is defined by (define factorial (lambda (x) (...)))].</div></p>
 
+<h3>More about programming languages</h3>
+<p>As you may have seen, many aspects of programming languages can be observed in this Micro Lisp implementation:</p>
+<p><a href="https://www.youtube.com/watch?v=_C5AHaS1mOA">Compilation by Interpreter</a> - a program is computed one row at a time. In this implementation, the interpreter turns a code line to a translatable object (sitting in the cons pool), ready to be evaluated.</p>
+<p><a href="https://en.wikipedia.org/wiki/Type_system#DYNAMIC">Dynamic Typing</a> - language values has rtti (run time type information), indicating their type. No type checks occur, type mismatch means run time failure.</p>
+<p><a href="https://en.wikipedia.org/wiki/Strong_and_weak_typing#Definitions_of_.22strong.22_or_.22weak.22">Strong Typing</a> - no implicit cast (actually no casts at all...).</p>
+<p><a href="https://en.wikipedia.org/wiki/Union_type">Union Type</a> - a cons is compound of car and cdr: each of them can be a pointer to another cons, or an atomic value (<a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>).</p>
+<p>Garbage Collection - explained quite well before (under Memory Management).</p>
 
+<h3>Examples</h3>
+<p><a href="examples/simple_example.kpl">First Steps in Lisp</a> - you can experience the various operations, available in this implementation. Pay attention to the prefix notation, and to the way we define variables (remember functions are also values! "functions" as you know them are simply variables containing function values).</p>
+<p><a href="examples/writing_functions.kpl">Functions</a> - pay attention to the way we use conditioning (if native). We can make lists using "quote": (1 2 3) this will not run properly, as the system will try to use "1" as a function and fail. (quote (1 2 3)) will work, and will generate the list (1 (2 (3 ()))) ("()" is nil value, also """"). The interpreter translate the phrase "(1 2 3)" to this list, and quote returns it without evaluation.</p>
+<p><a href="examples/capabilities.kpl">Advanced Language Capabilities</a> - remember the functions and symbols structure (see above). We can extract the lambda and symbol identifiers, using car operation on function and symbol values ("(quote x)" returns symbol, because quote does not evaluate its parameter). "eval" function (from the program) receives a symbol and return its evaluation: we use manipulations to activate the lookup procedure. "design" gets a list of symbols and a value, and translate recursively each symbol that appears in the parameter, unless its on the list. Pay attention how we use design in order to build "constant" - a function that gets a function of two parameters and a value, and returns a function of one parameter that compute the received function with the received value and its parameter. For example, (constant + 8) returns a function that receives a parameter, and add 8 to it. This example shows the great power of this language - although it is a minimized implementation, you are not limited at all and can make very sophisticated procedures (I have made a functions that creates polynomials. You can try by yourselves!).</p>
 
-
-
-
-
-
-
-<h3>Code Examples:</h3>
- <table style="width:70%" align="center">
-  <tr>
-    <td colspan="2"><a href="examples/endless_list.kpl">Endless List (very good example)</a></td>
-    <td><a href="examples/automate.kpl">Automate</a></td>
-    <td><a href="examples/avltree.kpl">AVL tree</a></td>
-  </tr>
-  <tr>
-    <td><a href="examples/bidirectional_list.kpl">Bidirectional List</a></td>
-    <td><a href="examples/counter.kpl">Counter</a></td>
-    <td><a href="examples/graph.kpl">Graph</a></td>
-    <td><a href="examples/iterator.kpl">Iterator</a></td>
-  </tr>
-</table>
+<h3>Exercise</h3>
+<p>Self Practice:</p>
+<p>a) What are the similarities and differences between these two problems?</p>
+<p>- Write a function that receives a list of numbers, and multiply each number by 2 (called double).</p>
+<p><p>- Write a function that receives a list of numbers, and returns true if it is sorted (called sorted).</p></p>
+<p>Many languages (such as Python) supports "map" and "reduce" functions. Map receives a function and a list, and applies the function to every item of the list (and returns a list of the results). Reduce also receives a function (of two parameters) and a list, and reduce the list into one value (search example on the net).</p>
+<p>b) Implement map and reduce functions <a href="examples/exercise.kpl">in this file</a>.</p>
+<p>c) In the same file, implement double and sorted functions (described above).</p>
 
 <a href="google4f28465c7feae320.html">For Google</a>
 <!--done for now...-->
