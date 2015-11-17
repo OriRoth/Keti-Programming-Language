@@ -1,0 +1,36 @@
+;lisp if conditioning:
+(if (< 7 4) "oops" 9)
+
+;same as:
+;(7 < 4 ? "oops" : 9)
+
+
+;recursive implementation of factorial function ;
+(define factorial (lambda (x)
+	(if (= x 0) 1 (* x (factorial (- x 1))))
+))
+
+(factorial 6)
+
+;same as:
+;int factorial(int x) {
+;	return (x == 0 ? 0 : x * factorial(x - 1));
+;}
+
+
+;list in lisp:
+(1 2 3)				; wont work- why?
+(quote (1 2 3))		; better
+
+
+;list length function:
+(define length (lambda (lst)
+	(if (nil lst) 0 (+ 1 (length (cdr lst))))
+))
+
+(length (quote (1 5 2 7)))
+
+;same as:
+;int length(Node *current) {
+;	return (current == NULL ? 0 : 1 + length(current->next));
+;}
