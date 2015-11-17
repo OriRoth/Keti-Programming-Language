@@ -1,0 +1,41 @@
+(define li (car (lambda () 0))) ; lambda identifier
+(define si (car (quote x))) ; symbol identifier
+(define is_symbol (lambda (v) (= (car v) si)))
+(define is_lambda (lambda (v) (= (car v) li)))
+
+; return t if lst contains v ;
+(define contains (lambda (lst v)
+	(if (nil lst)
+		()
+		(if (= v (car lst))
+			t
+			(contains (cdr lst) v)
+		)
+	)
+))
+
+; symbol evaluation ;
+(define eval (lambda (v) ((cons li (cons () v)))))
+
+; design function ;
+(define design (lambda (p s)
+	(if (atom s)
+		s
+		(if (is_symbol s)
+			(if (contains p s)
+				s
+				(eval s)
+			)
+			(cons (design p (car s)) (design p (cdr s)))
+		)
+	)
+))
+
+; returns a function of one parameter, y, that computes (f x y) ;
+(define constant (lambda (f x)
+	(design (quote (y)) (cons li (cons (quote (y)) (quote (f x y)))))
+))
+
+(define multiple (constant constant *))	; wait what?
+(define triple (multiple 3))			; oh I get it!
+(triple 4)								; great job.
