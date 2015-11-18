@@ -21,10 +21,10 @@
 
     <section class="main-content">
 
-<h3>Background:</h3>
-<p>This is a minimalistic virtualization of a classic <a href="ftp://www.cs.utexas.edu/pub/AI-Lab/tech-reports/UT-AI-TR-85-6.pdf">Lisp</a> Machine, written in C. This implementation is very dynamic, easy to learn and fun! There is no use of pointers/allocations in the code (C accessories), only logic - the system is independent, and deals its memory by itself (including memory sweep). I am a Software Engineering student at the Technion, Israel, and this project was done at the summer of 2015.</p>
+<h3>Background</h3>
+<p>This is a minimalistic virtualization of a classic <a href="ftp://www.cs.utexas.edu/pub/AI-Lab/tech-reports/UT-AI-TR-85-6.pdf" target="_blank">Lisp</a> Machine, written in C. This implementation is very dynamic, easy to learn and fun! There is no use of pointers/allocations in the code (C accessories), only logic - the system is independent, and deals its memory by itself (including memory sweep). I am a Software Engineering student at the Technion, Israel, and this project was done at the summer of 2015.</p>
 
-<h3>Micro Lisp Style:</h3>
+<h3>Micro Lisp Style</h3>
 <p>Language values are: positive integers, strings, true, nil and cons (tuple of two other base values).</p>
 <p>Supported native functions are:</p>
 <table style="width:60%;text-align:center" align="center">
@@ -109,7 +109,7 @@
 	</tr>
 </table>
 
-<h3>What is in the files:</h3>
+<h3>What is in the files</h3>
 <p>* mainloop: contains the main function, which has the main game loop that waits for input, translate and process it and show the result (or error) on screen.</p>
 <p>* system: contains the main translation functions: resolve_expr (which receive a value and resolve it recursively), and lookup (which receive a symbol and return its value).</p>
 <p>* memory: deals with memory management. Supports allocation of cons, and the mark-sweep algorithm.</p>
@@ -117,14 +117,14 @@
 <p>* native: contains the implementation of the native functions.</p>
 <p>* error: contains the errors logic.</p>
 
-<h3>Structure:</h3>
+<h3>Structure</h3>
 <p>The language implementation is built from three main parts: memory management (memory.c, memory.h), expressions execution (system.c, system.h) and the interpreter (mainloop.c). We will now cover the techniques used in each level of the language.</p>
 
-<b>Memory Management:</b>
+<b>Memory Management</b>
 <p>The memory system contains two pools (large arrays of available space): pool of cons (32 bits) - cons_pool, and pool of characters - strings_pool. Alongside the pools we hold a free addresses stack for the cons pool (every time we allocate a cons, we pop an address from the stack and returns it), and a filler for the characters pool (integer pointing the first free cell- during allocation we forward the filler by number of cells equals the length of the allocated string). Shallow copy of strings is supported- instead of pointing the string in the pool, string values (in cons pool) point string handlers (special structure on the cons pool, takes whole cons 32 bits), which are special cons that contains the actual address of the string. Instead of allocating a new string when copying one, we just redirect it to the same handler. Placing the handlers on the cons pool is not mandatory, but it saves a lot of space saved when cancelling the handlers pool.</p>
 <p>When one of the pools is being filled, it is very possible that there are stale allocations we have done sometime in the past, which are no longer required. So instead of crashing the system, we preform <a href="https://en.wikipedia.org/wiki/Tracing_garbage_collection#Basic_algorithm" target="_blank">Garbage Collection</a>. Now we will describe the specific algorithm used in our memory system: First we define a root set- group of cons addresses that are valid and required (such as the current environment, see below). We mark every valid address- notice that the marking process is recursive, marking addresses from the root set and addresses pointed by them. Then we scan the cons pool, pushing free (or used but invalid) addresses to the free addresses stack. Additionally, if an address is mark and its car is handler identifier (special value used only for this purpose), then we push the address to another stack- handlers_sort_buffer. This buffer allows us to clean the strings pool- we sort the handler addresses by string address (at the strings pool), and then moving the strings one by one to the start of the pool (so we can move the strings filler to the left, means more free characters cells to its right). In conclusion, the first part of the algorithm is classic mark and sweep, but dealing with the strings required us using something called <a href="https://en.wikipedia.org/wiki/Fragmentation_%28computing%29" target="_blank">fragmentation</a> (the Hebrew version is very nice fyi).</p>
 
-<b>System Management and Translation:</b>
+<b>System Management and Translation</b>
 <p>The system uses a special cons structure called A-List. This is a simple cons list, represent the current environment nesting (the head of the list is the current environment). Each environment contains translation list- list of symbols (names and their values). The initial symbols stands for the native function. When we use define, we connect a name with a value- there are two options:</p>
 <p>a) The symbol is not defined: the symbol is inserted to the current environment.</p>
 <p>b) The symbol is already defined, in some environment: the symbol's value is replaced (it does not change place).</p>
@@ -134,10 +134,10 @@
 
 <h3>More about programming languages</h3>
 <p>As you may have seen, many aspects of programming languages can be observed in this Micro Lisp implementation:</p>
-<p><a href="https://www.youtube.com/watch?v=_C5AHaS1mOA">Compilation by Interpreter</a> - a program is computed one row at a time. In this implementation, the interpreter turns a code line to a translatable object (sitting in the cons pool), ready to be evaluated.</p>
-<p><a href="https://en.wikipedia.org/wiki/Type_system#DYNAMIC">Dynamic Typing</a> - language values has rtti (run time type information), indicating their type. No type checks occur, type mismatch means run time failure.</p>
-<p><a href="https://en.wikipedia.org/wiki/Strong_and_weak_typing#Definitions_of_.22strong.22_or_.22weak.22">Strong Typing</a> - no implicit cast (actually no casts at all...).</p>
-<p><a href="https://en.wikipedia.org/wiki/Union_type">Union Type</a> - a cons is compound of car and cdr: each of them can be a pointer to another cons, or an atomic value (<a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>).</p>
+<p><a href="https://www.youtube.com/watch?v=_C5AHaS1mOA" target="_blank">Compilation by Interpreter</a> - a program is computed one row at a time. In this implementation, the interpreter turns a code line to a translatable object (sitting in the cons pool), ready to be evaluated.</p>
+<p><a href="https://en.wikipedia.org/wiki/Type_system#DYNAMIC" target="_blank">Dynamic Typing</a> - language values has rtti (run time type information), indicating their type. No type checks occur, type mismatch means run time failure.</p>
+<p><a href="https://en.wikipedia.org/wiki/Strong_and_weak_typing#Definitions_of_.22strong.22_or_.22weak.22" target="_blank">Strong Typing</a> - no implicit cast (actually no casts at all...).</p>
+<p><a href="https://en.wikipedia.org/wiki/Union_type" target="_blank">Union Type</a> - a cons is compound of car and cdr: each of them can be a pointer to another cons, or an atomic value (<a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>).</p>
 <p>Garbage Collection - explained quite well before (under Memory Management).</p>
 
 <h3>Examples</h3>
