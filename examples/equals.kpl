@@ -1,0 +1,7 @@
+(define _native_equals =)
+
+(define = (lambda (x y)
+  ()
+))
+
+(= (cons 5 (cons "fractal" t)) (cons 5 (cons "fractal" t)))
