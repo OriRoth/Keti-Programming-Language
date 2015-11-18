@@ -157,6 +157,20 @@
 <h3>Challenges</h3>
 <p><a href="examples/equals.kpl">Equals</a> - the "=" native compares cons by address. Override it with an implement that compares cons recursively (dont forget to save the native "=" in some variable! we still want to use it).</p>
 <p>Want more? Contact me via email.</p>
+
+<h3>Object Oriented?</h3>
+<p>The idea behind Keti language was to create an object oriented extension of Micro Lisp, and object were actualy implemented in the previous versions (not in the current, I'm afraid). It could be done by adding two natives:</p>
+<p>- assign: receives a symbol, a value and some item. If the item is not an object, it turns it into one while adding the value as a field with the received symbol. Otherwise adds the field to the object.</p>
+<p>- supps: receive a symbol and an item. Returns true if the item (which can be cons/atom/object) supports a function with that symbol. For objects, it may happen when the symbol one of it fields, or otherwise when the symbol indicates a global function or a native.</p>
+<p>When calling a function, we should check if the first argument is an object. If so, we check if the function's symbol appears in its fields list- if it does, we call it instead.</p>
+<p>How we build objects? Objects should be identified using an identifier similar to those of lambda expressions and symbols. It should contain a list of its fields, while the original value (we turn into object) rests under "core" field (and it should be accessed when using some natives).</p>
+<p>Use example:</p>
+<p>(define x (assign r 5 6))					; Now x is an object, that contains 6 under "core" field, and 5 under "r" field.</p>
+<p>(r x)							; => 5.</p>
+<p>(assign + (lambda (x y) (+ (+ (r x) (core x)) y)) x)		; we overrided + operation for x.</p>
+<p>(+ x 2)							; => 13.</p>
+<p>(+ 2 x)							; => 8.</p>
+
 <a href="google4f28465c7feae320.html">For Google</a>
 <!--done for now...-->
 
