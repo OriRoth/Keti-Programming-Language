@@ -159,7 +159,7 @@
 <p>Want more? Contact me via email.</p>
 
 <h3>Object Oriented?</h3>
-<p>The idea behind Keti language was to create an object oriented extension of Micro Lisp, and object were actualy implemented in the previous versions (not in the current, I'm afraid). It could be done by adding two natives:</p>
+<p>The idea behind Keti language was to create an object oriented extension of Micro Lisp, and objects were actualy implemented in the previous versions (not in the current, I'm afraid). It could be done by adding two natives:</p>
 <p>- assign: receives a symbol, a value and some item. If the item is not an object, it turns it into one while adding the value as a field with the received symbol. Otherwise adds the field to the object.</p>
 <p>- supps: receive a symbol and an item. Returns true if the item (which can be cons/atom/object) supports a function with that symbol. For objects, it may happen when the symbol one of it fields, or otherwise when the symbol indicates a global function or a native.</p>
 <p>When calling a function, we should check if the first argument is an object. If so, we check if the function's symbol appears in its fields list- if it does, we call it instead.</p>
