@@ -3,21 +3,23 @@
 
 #include "memory.h"
 
+// native functions
 #define NATIVE_COUNT 16
 #define NATIVE_NAME_LIMIT 8
 memptr native_identifiers[NATIVE_COUNT];
 char native_names_buffer[NATIVE_NAME_LIMIT * NATIVE_COUNT];
 
+// lookup enum, for return type
 typedef enum {
 	ENVIRONMENT, DATA
 } LookUp;
 
-memptr environment;
-memptr nil;
-memptr t;
-memptr security_head;
+memptr environment;		// points current environment
+memptr nil;			// nil
+memptr t;			// true
+memptr security_head;		// security system variables
 memptr security_tail;
-memptr lambda_identifier;
+memptr lambda_identifier;	// various identifiers
 memptr symbol_identifier;
 memptr handler_identifier;
 
