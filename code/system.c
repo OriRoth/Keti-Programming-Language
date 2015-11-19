@@ -21,10 +21,17 @@ char native_names_buffer[NATIVE_NAME_LIMIT * NATIVE_COUNT] = { 'q', 'u', 'o',
 memptr resolve_expression(memptr expr);
 memptr lookup(memptr expr, LookUp lu);
 
+/*
+ * initialize security head, while disconnecting the previous secured addresses from the root set
+*/
 void security_init() {
 	security_head = nil;
 }
 
+/*
+ * a safe allocation - connecting the address to the security list, so it will
+ * be marked if garbage collection will be called
+*/
 memptr safe_allocate_cons() {
 
 	announce_allocation(2);
@@ -41,7 +48,9 @@ memptr safe_allocate_cons() {
 	return GET_CAR(security_tail);
 }
 
-// returns the number of nodes in a list
+/*
+ * returns the number of nodes in a list
+*/
 int num_nodes(memptr list) {
 
 	if (list == nil) {
@@ -56,7 +65,9 @@ int num_nodes(memptr list) {
 	return counter;
 }
 
-// compares two strings
+/*
+ * receives two string values, and compares them
+*/
 bool string_compare(memptr str1, memptr str2) {
 
 	int iter1 = HANDLER_STRING_ADDRESS(GET_CDR(STRING_HANDLER_ADDRESS(str1)));
@@ -69,7 +80,9 @@ bool string_compare(memptr str1, memptr str2) {
 	}
 	return strings_pool[iter1] == strings_pool[iter2];
 }
-
+/*
+ * inserts a data into a list (front insert)
+*/
 memptr list_insert(memptr list_head, memptr data) {
 
 	memptr new_node = allocate_cons();
@@ -82,11 +95,17 @@ memptr list_insert(memptr list_head, memptr data) {
 	return new_node;
 }
 
+/*
+ * insert symbol into an environment
+*/
 void insert_symbol(memptr env, memptr data) {
 
 	list_insert(env, data);
 }
 
+/*
+ * removes symbol from an environment, returns true if done successfuly
+*/
 bool remove_symbol(memptr env, memptr data) {
 
 	memptr next_node, current_node, previous_node, current_data;
@@ -116,12 +135,17 @@ bool remove_symbol(memptr env, memptr data) {
 	return false;
 }
 
+/*
+ * inserts native function into system
+*/
 #define INSERT_BUILTIN_SETUP(i)	do {																			\
 									ALLOCATE_STRING_FROM_BUFFER(native_names_buffer, i * NATIVE_NAME_LIMIT);	\
 									insert_builtin(i);															\
 								} while (0)
 
-// we assume all allocations would be successful
+/*
+ * commits the insertion. we assume all allocations would be successful
+*/
 void insert_builtin(int index) {
 
 	memptr data = allocate_cons();
@@ -133,6 +157,9 @@ void insert_builtin(int index) {
 	list_insert(environment, data);
 }
 
+/*
+ * initialize system. allocate all the identifiers, such as nil, true, natives...
+*/
 void system_initialize() {
 
 	initialize_memory_system();
@@ -161,6 +188,9 @@ void system_initialize() {
 	}
 }
 
+/*
+ * return the value of the symbol named name. can return the symbols environment or value
+*/
 memptr lookup(memptr name, LookUp lu) {
 
 	memptr next_env = environment, current_env, next_node, current_node,
@@ -197,6 +227,9 @@ memptr lookup(memptr name, LookUp lu) {
 	return NOT_FOUND;
 }
 
+/*
+ * receives a parameter list and values, and creates a new environment by them
+*/
 static bool create_environment(memptr values_list, memptr parameters_list) {
 
 	int values_size = num_nodes(values_list), parameters_size = num_nodes(
@@ -257,12 +290,21 @@ static bool create_environment(memptr values_list, memptr parameters_list) {
 	return true;
 }
 
+/*
+ * destroy current environment
+*/
 static void destroy_environment() {
 
 	// we assume the base environment is not being destroyed
 	environment = GET_CDR(environment);
 }
 
+/*
+ * main resolvement logic. receives an expression address and returns its evaluation result
+ * if its an atomic value, return it
+ * if its a call to a native function, commit it
+ * if its a call to a user function (lambda expression), create its environment and evaluate its return value
+*/
 memptr resolve_expression(memptr expr) {
 
 	if (IS_NOT_FOUND(expr)) {
