@@ -4,6 +4,9 @@
 
 void mark_sweep();
 
+/*
+ * initialize the stacks, pushing all available addresses
+*/
 void initialize_memory_system() {
 
 	for (int i = 1; i < MEM_SIZE; i++) {
@@ -13,6 +16,10 @@ void initialize_memory_system() {
 	strings_filler = 0;
 }
 
+/*
+ * pops a free address and returns it. if it fails, garbage collection is called.
+ * if it also fails, we panic and exit
+*/
 memptr allocate_cons() {
 
 	if (free_cons_stack_head >= 0) {
@@ -31,6 +38,11 @@ memptr allocate_cons() {
 	exit(0);
 }
 
+/*
+ * checks there at least num_of_allocations free records on the stack. so after
+ * calling this function, we can assume garbage collection will not be called during
+ * the next num_of_allocations allocations
+*/
 void announce_allocation(int num_of_allocations) {
 
 	if (free_cons_stack_head >= num_of_allocations - 1) {
@@ -47,7 +59,10 @@ void announce_allocation(int num_of_allocations) {
 	exit(0);
 }
 
-// returns string handler address (16 bits)
+/*
+ * puts the string from strings buffer into the chars pool, allocates a string
+ * handler and returns it
+*/
 cons allocate_string_from_string_buffer() {
 
 	string_buffer[STRING_BUFFER_SIZE - 1] = '\0';
@@ -87,10 +102,13 @@ cons allocate_string_from_string_buffer() {
 	exit(0);
 }
 
-/*
- * Garbage Collection
- */
+/**
+ ** Garbage Collection
+ **/
 
+/*
+ * recursive mark. if string is being detected, we mark its handler as well
+*/
 static void rec_mark(memptr root) {
 
 	marks_stack[++marks_stack_head] = root;
@@ -114,6 +132,9 @@ static void rec_mark(memptr root) {
 	}
 }
 
+/*
+ * filling the root set
+*/
 void fill_root_set() {
 
 	root_set[0] = nil;
@@ -128,6 +149,9 @@ void fill_root_set() {
 	}
 }
 
+/*
+ * garbage collection - mark n sweep and defragmentation
+*/
 void mark_sweep() {
 
 	fprintf(stderr, "\nGARBAGE COLLECTION INITIATED\n");
