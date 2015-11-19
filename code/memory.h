@@ -5,9 +5,12 @@
 #include "bitarray.h"
 #include "error.h"
 
+// cons pool size
 #define MEM_SIZE (1 << 14)
+// chars pool size
 #define STRINGS_POOL_SIZE (1 << 14)
 
+// not found - error address
 #define NOT_FOUND ((1<<14)-1)
 #define IS_NOT_FOUND(value16) ((value16) == NOT_FOUND)
 
@@ -32,6 +35,7 @@
 #define SET_CAR(at16, value16) do {cons_pool[at16] = ((cons_pool[at16] & ((1<<16)-1)) | ((value16)<<16));} while (0)
 #define SET_CDR(at16, value16) do {cons_pool[at16] = ((cons_pool[at16] & (((1<<16)-1)<<16)) | (value16));} while (0)
 
+// print error messege
 #define MEMORY_ERROR	do {										\
 							error = false;							\
 							COMMIT_ERROR(ERROR_MEMORY, ERROR_OOM);	\
@@ -40,28 +44,34 @@
 							fflush(stderr);							\
 						} while (0)
 
+// cons is 32 bits sized
 typedef unsigned int cons;
+// address is 16 bits sized
 typedef unsigned short memptr;
 
-cons cons_pool[MEM_SIZE];
-memptr free_cons_stack[MEM_SIZE];
-int free_cons_stack_head;
-bit cons_marks[BITS(MEM_SIZE)];
+cons cons_pool[MEM_SIZE];		// cons pool
+memptr free_cons_stack[MEM_SIZE];	// cons pool free addresses stack
+int free_cons_stack_head;		// stacks head
+bit cons_marks[BITS(MEM_SIZE)];		// cons marks bit array, used in garbage collection
 
-memptr handlers_sort_buffer[MEM_SIZE];
+memptr handlers_sort_buffer[MEM_SIZE];	// sort buffer, used in garbage collection
 
-char strings_pool[STRINGS_POOL_SIZE];
-int strings_filler;
+char strings_pool[STRINGS_POOL_SIZE];	// chars pool
+int strings_filler;			// chars pool filler. points first free record on the pool
 
+// string buffer, from which strings allocation is made
 #define STRING_BUFFER_SIZE 16
 char string_buffer[STRING_BUFFER_SIZE];
 
+// root set of mark n sweep
 // TODO: insert specific NATIVE_COUNT
 #define ROOT_SET_SIZE (7 + 16)
 memptr root_set[ROOT_SET_SIZE];
+// used in order to reduce recursion
 memptr marks_stack[MEM_SIZE];
 int marks_stack_head;
 
+// moves string from buffer to pool
 #define ALLOCATE_STRING_FROM_BUFFER(buff, i)	do {												\
 													int filler = 0;									\
 													while (buff[i + filler] != '\0') {				\
