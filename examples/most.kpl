@@ -1,0 +1,10 @@
+; you may add parameters as you please
+(define most (lambda ()
+  "todo: implement"
+))
+
+(define min (lambda (lst) (most)))
+(define max (lambda (lst) (most)))
+
+(min (quote (3 9 5 2))) ; shuold be 2
+(max (quote (3 9 5 2))) ; should be 9
