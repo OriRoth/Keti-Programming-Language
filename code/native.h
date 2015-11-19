@@ -4,6 +4,7 @@
 #include "memory.h"
 #include <stdio.h>
 
+// natives enum. 0 and 1 are nil and true
 enum {
 	FUNC_QUOTE = 2,
 	FUNC_DEFINE,
@@ -23,8 +24,10 @@ enum {
 	FUNC_NIL
 } Native;
 
+// sign an integer value
 int fix_integer(int integer_value);
 
+/* native functions */
 memptr func_quote(memptr expr);
 memptr func_define(memptr expr);
 memptr func_lambda(memptr expr);
