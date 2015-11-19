@@ -3,19 +3,28 @@
 #include <stdio.h>
 #include <windows.h>
 
+// input buffer size
 #define INPUT_BUFFER_SIZE (1<<12)
 #define SYNTAX_ERROR (-1)
+// skips spaces
 #define SKIP_SPACES(iter, buff)	do {										\
 									while (is_space(buff[iter])) {++iter;}	\
 								} while(0)
 
+// input buffer, contains entire line at a time. line defined by ...(...)
 char line_buffer[INPUT_BUFFER_SIZE];
 
+// input stream
 FILE* input;
 int stdin_backup;
+// true if done reading input file
 bool done_reading = false;
+// counts parentheses- increases uppon '(', decreases uppon ')'
 int parentheses_counter;
 
+/*
+ * receives input stream, return next token
+*/
 char get_input(FILE *input) {
 
 	char c;
@@ -67,6 +76,10 @@ char get_input(FILE *input) {
 	return c;
 }
 
+/*
+ * moves a string from the line buffer to the strings buffer
+ * argument is starting index in the line buffer
+*/
 void move_string_to_string_buffer(int start) {
 
 	int i = 0;
@@ -75,17 +88,28 @@ void move_string_to_string_buffer(int start) {
 	} while (line_buffer[start++] != '\0' && i < STRING_BUFFER_SIZE);
 }
 
+/*
+ * receives a character, returns true if it is a space
+*/
 bool is_space(char c) {
 
 	return c == '\n' || c == '\t' || c == ' ' || c == '\r';
 }
 
+/*
+ * receives a character, returns true if it is a digit
+*/
 bool is_digit(char c) {
 
 	return (c >= '0' && c <= '9');
 }
 
-bool is_nil;
+/*
+ * parent - expression parent in translation tree
+ * start - start index in line buffer
+ * returns SYNTAX_ERROR uppon translation error, or the end index of the expression in the line buffer
+*/
+bool is_nil;	// true if result is nil
 int translate_function(memptr parent, int start) {
 
 	int iter = start + 1;
@@ -177,6 +201,10 @@ int translate_function(memptr parent, int start) {
 	return SYNTAX_ERROR;
 }
 
+/*
+ * receives an addresss of an object on the pool, and prints it
+ * recursive printing of cons, limited by MAX_DEPTH
+*/
 #define MAX_DEPTH 4
 void print_result(memptr result, int depth) {
 
@@ -267,6 +295,11 @@ void print_mem() {
 }
 #endif
 
+/*
+ * the main loop: may receive an input file. if it does, we reads it first
+ * fill the line buffer- when completing a line, translates it (using translate_function),
+ * then evaluate it (using resolve_expression) and prints the result (or error) (using print_result)
+*/
 int main(int argc, char *argv[]) {
 
 	if (argc > 1) {
