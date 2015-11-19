@@ -28,13 +28,14 @@
 <p>Language values are:</p>
 <p>~ Signed Integer: such as 152.</p>
 <p>~ Strings: such as "Monty".</p>
-<p>~ True: "t" is true.</p>
-<p>~ Nil: "()" is nil (and plays false role as well).</p>
+<p>~ True: t is true.</p>
+<p>~ Nil: () is nil (and plays false role as well).</p>
 <p>~ S-Expression: definde recursively- atomic values are S-Expressions. if x1 ... xn are S-Expression, so does (x1 ... xn).</p>
 <p>Note:</p>
 <p>- in this version you cannot type negative numbers, so -123 would be regarded as a symbol.</p>
 <p>- "" would be regarded as nil.</p>
 <p>- As you will see later on, we can create S-Expression (also called a list), using the "cons" native function (see also "quote").</p>
+<p>- (), nil, is a <a href="https://en.wikipedia.org/wiki/Unit_type">unit type</a> (a list of zero values).</p>
 <p>Supported native functions are:</p>
 <table style="width:90%;text-align:center" align="center">
 	<tr>
