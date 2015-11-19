@@ -25,7 +25,12 @@
 <p>This is a minimalistic virtualization of a classic <a href="ftp://www.cs.utexas.edu/pub/AI-Lab/tech-reports/UT-AI-TR-85-6.pdf" target="_blank">Lisp</a> Machine, written in C. This implementation is very dynamic, easy to learn and fun! There is no use of pointers/allocations in the code (C accessories), only logic - the system is independent, and deals its memory by itself (including memory sweep). I am a Software Engineering student at the Technion, Israel, and this project was done at the summer of 2015.</p>
 
 <h3>Micro Lisp Style</h3>
-<p>Language values are can be devided into two groups: atomic values - which are integer string nil (false) and true - and cons (a pointer to a cons record).</p>
+<p>Language values:</p>
+<p>Signed Integer: such as 152 (in this version you cannot type negative numbers, so -123 would be regarded as a symbol).</p>
+<p>Strings: such as "Monty" ("" would be regarded as nil, see below).</p>
+<p>True: "t" is true.</p>
+<p>Nil: "()" is nil (and plays false role as well).</p>
+<p>S-Expression: definde recursively- atomic values are S-Expressions. if x1 ... xn are S-Expression, so does (x1 ... xn). As you will see later on, we can create S-Expression (or lists), using the "cons" native function.</p>
 <p>Supported native functions are:</p>
 <table style="width:90%;text-align:center" align="center">
 	<tr>
@@ -79,7 +84,7 @@
 		<td>Receives a value. Return true if it is nil, else false.</td>
 	</tr>
 </table>
-<p>Most expressions are in the form of <a href="https://en.wikipedia.org/wiki/Polish_notation" target="_blank">Prefix Notation</a> (<i>function_name</i> { <i>argument</i>}) - in parentheses, and the function comes before the arguments (if any) <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>. Moreover, there are special structures which require specific identification: lambda functions (functions created by you) and symbols (system structure, used to connect a name to a value).</p>
+<p>Most expressions are in the form of prefix notation (<a href="https://en.wikipedia.org/wiki/Polish_notation" target="_blank">Cambridge polish notation</a>) (<i>function_name</i> { <i>argument</i>}) - in parentheses, and the function comes before the arguments (if any) <a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>. Moreover, there are special structures which require specific identification: lambda functions (functions created by you) and symbols (system structure, used to connect a name to a value).</p>
 <p><div align="center"><img src="http://s30.postimg.org/pcumb4zsx/img1.png" alt="lambda functions and symbols structure"></div></p>
 <p>Some simple examples:</p>
 <table style="width:90%;text-align:center" align="center">
