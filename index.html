@@ -140,6 +140,8 @@
 <p>When we use a user function, a new environment is created (its next environment is the previous one), while the arguments sent to the function are being computed and inserted to it (as symbols- they are being linked to the function's parameters in order to create the symbols). Next the function value is computed in the new environment, and finally we destroy the environment (by redirecting the current environment index to the next environment).</p>
 <p><div align="center"><img src="http://s2.postimg.org/kfuz68owp/img2.png" alt="system structure"></div></p>
 <p><div align="center">The system structure- a list (environment nodes) of lists (symbols nodes). This specific state of the system can occur after calling a user function, which uses x as a parameter, with 7 as the argument [for instance, (factorial 7) when factorial is defined by (define factorial (lambda (x) (...)))].</div></p>
+<p><div align="center"><img src="http://s24.postimg.org/6ck1qyd85/New_Bitmap_Image.png" alt="system structure"></div></p>
+<p><div align="center">You can look at this structure as a stack of environments, while every environment is a list of symbols (same as above!).</div></p>
 
 <h3>More about programming languages</h3>
 <p>As you may have seen, many aspects of programming languages can be observed in this Micro Lisp implementation:</p>
