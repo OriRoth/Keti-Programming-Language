@@ -151,6 +151,17 @@
 <p><a href="https://en.wikipedia.org/wiki/Union_type" target="_blank">Disjoint Union</a> - a cons is compound of car and cdr: each of them can be a pointer to another cons, or an atomic value (<a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>).</p>
 <p>Garbage Collection - explained quite well before (under Memory Management).</p>
 <p><a href="https://en.wikipedia.org/wiki/Unit_type" target="_blank">Unit Type</a> - (), nil, is a list of zero values.</p>
+<p><a href="https://en.wikipedia.org/wiki/Scope_%28computer_science%29#Dynamic_scoping" target="_blank">Dynamic Scoping</a> - an identifier refers to the identifier associated with the most recent environment. For example:</p>
+<p><u>C style</u></p>
+<p>int x = 42;</p>
+<p>int f() {return x;}</p>
+<p>void main() {x = 1; printf("%d\n", f());} // => 42</p>
+<p><u>Lisp style</u></p>
+<p>(define second (lambda (x y) y))</p>
+<p>(define x 42)</p>
+<p>(define f (lambda () x))</p>
+<p>(define main (lambda () (second (define x 1) (f))))</p>
+<p>(main) // => 1</p>
 
 <h3>Examples</h3>
 <p><a href="examples/simple_example.kpl">First Steps in Lisp</a> - you can experience the various operations, available in this implementation. Pay attention to the prefix notation, and to the way we define variables (remember functions are also values! "functions" as you know them are simply variables containing function values).</p>
