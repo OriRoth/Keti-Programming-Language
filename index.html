@@ -26,10 +26,10 @@
 
 <h3>Micro Lisp Style</h3>
 <p>Language values are:</p>
-<p>~ Signed Integer: such as 1764.</p>
-<p>~ Strings: such as "Monty".</p>
-<p>~ True: t is true.</p>
-<p>~ Nil: () is nil (a list of 0 values).</p>
+<p>~ Signed Integer: such as 1764. (Atomic value)</p>
+<p>~ Strings: such as "Monty" (Atomic value).</p>
+<p>~ True: t is true. (Atomic value)</p>
+<p>~ Nil: () is nil (a list of 0 values). (Atomic value)</p>
 <p>~ S-Expression: definde recursively- atomic values are S-Expressions. if x1 ... xn are S-Expression, so does (x1 ... xn).</p>
 <p>Note:</p>
 <p>- In this version you cannot type negative numbers, so -123 would be regarded as a symbol.</p>
@@ -145,8 +145,8 @@
 
 <h3>More about programming languages</h3>
 <p>As you may have seen, many aspects of programming languages can be observed in this Micro Lisp implementation:</p>
-<p><a href="https://www.youtube.com/watch?v=_C5AHaS1mOA" target="_blank">Compilation by Interpreter</a> - a program is computed one row at a time. In this implementation, the interpreter turns a code line to a translatable object (sitting in the cons pool), ready to be evaluated.</p>
-<p><a href="https://en.wikipedia.org/wiki/Type_system#DYNAMIC" target="_blank">Dynamic Typing</a> - no type checks occur, type mismatch means run time failure.</p>
+<p><a href="https://www.youtube.com/watch?v=_C5AHaS1mOA" target="_blank">Interpreter Implementation</a> - a program is computed one row at a time. In this implementation, the interpreter turns a code line to a translatable object (sitting in the cons pool), ready to be evaluated.</p>
+<p><a href="https://en.wikipedia.org/wiki/Type_system#DYNAMIC" target="_blank">Dynamic Typing</a> - type mismatch means run time failure.</p>
 <p><a href="https://en.wikipedia.org/wiki/Strong_and_weak_typing#Definitions_of_.22strong.22_or_.22weak.22" target="_blank">Strong Typing</a> - no implicit cast (actually no casts at all...).</p>
 <p><a href="https://en.wikipedia.org/wiki/Union_type" target="_blank">Disjoint Union</a> - a cons is compound of car and cdr: each of them can be a pointer to another cons, or an atomic value (<a href="http://webcourse.cs.technion.ac.il/234319/Spring2015/ho/WCFiles/_article-3-+-values-and-types.pdf" target="_blank">See more</a>).</p>
 <p>Garbage Collection - explained quite well before (under Memory Management).</p>
