@@ -10,3 +10,9 @@ One should update the code before try doing something like:
 (define f (lambda () (define x 2)))
 (define x 1)
 (f) ; x should be 2, but it is 1
+
+Line 105 in system.c should be:
+if (string_compare(GET_CAR(GET_CDR(current_data)), GET_CAR(GET_CDR(data)))) {
+instead of
+if (string_compare(GET_CAR(GET_CDR(current_data)), GET_CAR(data))) {
+causes very strange bug: by luck, the call (define define define) would delete quote definition.
