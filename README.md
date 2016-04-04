@@ -16,3 +16,9 @@ if (string_compare(GET_CAR(GET_CDR(current_data)), GET_CAR(GET_CDR(data)))) {
 instead of
 if (string_compare(GET_CAR(GET_CDR(current_data)), GET_CAR(data))) {
 causes very strange bug: by luck, the call (define define define) would delete quote definition.
+
+Line 313 in native.c:
+return string_compare(first_arg, second_arg) ? t : nil;
+
+Line 318 in native.c:
+return t;
