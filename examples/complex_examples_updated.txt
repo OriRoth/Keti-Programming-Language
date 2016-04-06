@@ -1,0 +1,89 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; this works after the corrections in README file ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Lambda identifier ;
+(define li (car (lambda () ())))
+; param: f - two argument function
+; param: x - first argument to be constant
+; return: a function of one argument (y) that computes
+;	(f x y) by this order
+(define constant (lambda (f x)
+	(cons
+		li
+		(cons
+			(quote (x))
+			(cons
+				f
+				(cons
+					(cons
+						(quote quote)
+						(cons x ())
+					)
+					(cons
+						(quote x)
+						()
+					)
+				)
+			)
+		)
+	)
+))
+; param: l - a list
+; return: the length of the list
+(define length (lambda (l)
+	(if (nil l)
+		0
+		(+ 1 (length (cdr l)))
+	)
+))
+; param: x - a number
+; param y - a number
+; return: x^y (x in the power of y)
+(define ** (lambda (x y)
+	(if (= y 0)
+		1
+		(* x (** x (- y 1)))
+	)
+))
+; param: p - a list of numbers representing a polynomial.
+;	for example, (quote (1 2 3)) is 3x^2+2x+1
+; param: x - a number 
+; return: p(x)
+(define compute_poly (lambda (p x)
+	(if (nil p)
+		0
+		(+ (* (car p) (** x (- (length p) 1))) (compute_poly (cdr p) x))
+	)
+))
+; param: p - a polynomial
+; return: a function of one argument, computing p(x)
+(define generate_poly (lambda (p)
+	(constant compute_poly p)
+))
+
+;;;;;;;;;;;;
+; Examples ;
+;;;;;;;;;;;;
+(define p1 (generate_poly (quote (1 2 1))))		; p1(x) = x^2+2x+1
+(p1 3)											; p1(3) = 16
+(define p2 (generate_poly (quote (1 0 0 1))))	; p2(x) = x^3+1
+(p2 4)											; p2(4) = 65
+
+; running a polynomial on a list
+(define map (lambda (f l)
+	(if (nil l)
+		()
+		(cons (f (car l)) (map f (cdr l)))
+	)
+))
+(define result (map (generate_poly (quote (1 0 2))) (quote (1 2 3))))
+
+; a generator function!
+(define generator (constant constant constant))
+(define multiplier (generator *))
+(define X6 (multiplier 6))
+(X6 4)
+
+; same thing! think about it...
+(define generator (generator generator))
